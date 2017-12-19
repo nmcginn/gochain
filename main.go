@@ -13,13 +13,21 @@ func main() {
 	app.Name = "RPC Test"
 	app.Usage = ""
 
-	app.Commands = []cli.Command{{
-		Name:    "serve",
-		Aliases: []string{},
-		Usage:   "start the RPC server",
-		Action:  serve,
-		Flags:   []cli.Flag{},
-	},
+	app.Commands = []cli.Command{
+		{
+			Name:    "serve",
+			Aliases: []string{},
+			Usage:   "start the RPC server",
+			Action:  serve,
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:   "port, p",
+					Value:  12345,
+					Usage:  "Server port to bind to",
+					EnvVar: "PORT",
+				},
+			},
+		},
 		{
 			Name:    "run",
 			Aliases: []string{},
@@ -31,8 +39,15 @@ func main() {
 					Value: "foobar",
 					Usage: "The data to send to the RPC server",
 				},
+				cli.IntFlag{
+					Name:   "port, p",
+					Value:  12345,
+					Usage:  "Server port to bind to",
+					EnvVar: "PORT",
+				},
 			},
-		}}
+		},
+	}
 
 	err := app.Run(os.Args)
 	if err != nil {
@@ -43,7 +58,7 @@ func main() {
 
 func serve(c *cli.Context) error {
 	s := &gorpc.Server{
-		Addr: ":12345",
+		Addr: ":" + fmt.Sprintf("%d", c.Int("port")),
 		Handler: func(clientAddr string, request interface{}) interface{} {
 			log.Printf("Obtained request %v from the client %s\n", request, clientAddr)
 			return request
@@ -55,7 +70,7 @@ func serve(c *cli.Context) error {
 
 func run(c *cli.Context) error {
 	client := &gorpc.Client{
-		Addr: "127.0.0.1:12345",
+		Addr: "127.0.0.1:" + fmt.Sprintf("%d", c.Int("port")),
 	}
 	client.Start()
 
