@@ -1,0 +1,3 @@
+package: github.com/nmcginn/grpc-test
+import:
+- package: github.com/valyala/gorpc
