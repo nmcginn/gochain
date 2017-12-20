@@ -1,5 +1,5 @@
 vendor/
 .idea/
-grpc-test
+gochain
 glide.lock
 *.pb.go
