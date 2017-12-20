@@ -1,3 +1,5 @@
 package: github.com/nmcginn/grpc-test
 import:
 - package: github.com/valyala/gorpc
+- package: github.com/urfave/cli
+- package: github.com/golang/protobuf/proto
