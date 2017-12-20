@@ -1,0 +1,6 @@
+syntax = "proto3";
+package main;
+
+message Test{
+	string msg = 1; // remember 1 is a field number
+}

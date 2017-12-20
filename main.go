@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"github.com/golang/protobuf/proto"
 	"github.com/urfave/cli"
 	"github.com/valyala/gorpc"
 	"log"
@@ -60,7 +61,9 @@ func serve(c *cli.Context) error {
 	s := &gorpc.Server{
 		Addr: ":" + fmt.Sprintf("%d", c.Int("port")),
 		Handler: func(clientAddr string, request interface{}) interface{} {
-			log.Printf("Obtained request %v from the client %s\n", request, clientAddr)
+			cool_data := Test{}
+			proto.Unmarshal(request.([]byte), &cool_data) // returns an err, but meh
+			log.Printf("Obtained request %v from the client %s\n", cool_data.Msg, clientAddr)
 			return request
 		},
 	}
@@ -74,7 +77,14 @@ func run(c *cli.Context) error {
 	}
 	client.Start()
 
-	resp, err := client.Call(c.String("data"))
-	fmt.Printf("%s", resp.(string))
+	message := Test{
+		Msg: c.String("data"),
+	}
+	message_bytes, _ := proto.Marshal(&message)
+
+	resp, err := client.Call(message_bytes)
+	cool_data := Test{}
+	proto.Unmarshal(resp.([]byte), &cool_data)
+	fmt.Printf("%s", cool_data.Msg)
 	return err
 }

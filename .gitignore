@@ -1,3 +1,5 @@
 vendor/
+.idea/
 grpc-test
 glide.lock
+*.pb.go
