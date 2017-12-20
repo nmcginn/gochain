@@ -16,9 +16,9 @@ func main() {
 
 	app.Commands = []cli.Command{
 		{
-			Name:    "serve",
+			Name:    "daemon",
 			Aliases: []string{},
-			Usage:   "start the RPC server",
+			Usage:   "start the daemon",
 			Action:  serve,
 			Flags: []cli.Flag{
 				cli.IntFlag{
