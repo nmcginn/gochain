@@ -20,3 +20,7 @@ message Action {
 	}
 
 }
+
+message Test {
+	string msg = 1;
+}

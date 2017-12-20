@@ -1,10 +1,16 @@
 package main
 
 import (
+	"bufio"
+	"crypto/rand"
+	"crypto/rsa"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/urfave/cli"
 	"github.com/valyala/gorpc"
+	"io/ioutil"
 	"log"
 	"os"
 )
@@ -48,6 +54,18 @@ func main() {
 				},
 			},
 		},
+		{
+			Name:    "keys",
+			Aliases: []string{},
+			Usage:   "generate a new keypair",
+			Action:  generate_keys,
+			Flags: []cli.Flag{
+				cli.BoolFlag{
+					Name:  "view, v",
+					Usage: "View your existing public key",
+				},
+			},
+		},
 	}
 
 	err := app.Run(os.Args)
@@ -86,5 +104,38 @@ func run(c *cli.Context) error {
 	cool_data := Test{}
 	proto.Unmarshal(resp.([]byte), &cool_data)
 	fmt.Printf("%s", cool_data.Msg)
+	return err
+}
+
+func generate_keys(c *cli.Context) error {
+	keyfile := os.Getenv("HOME") + "/.gochain"
+	if c.Bool("view") {
+		data, err := ioutil.ReadFile(keyfile)
+		keys := rsa.PrivateKey{}
+		if err == nil {
+			err = json.Unmarshal(data, &keys)
+			key_bytes := keys.PublicKey.N.Bytes()
+			fmt.Printf("%v\n", keys.PublicKey.E)
+			fmt.Printf("%v\n", base64.StdEncoding.EncodeToString(key_bytes))
+		}
+		return err
+	}
+
+	if _, err := os.Stat(keyfile); err == nil {
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("A keyfile already exists. Are you sure? (y/n): ")
+		text, _ := reader.ReadString('\n')
+		if text != "y" {
+			return nil
+		}
+	}
+
+	keys, err := rsa.GenerateKey(rand.Reader, 2048)
+	if err != nil {
+		return err
+	}
+
+	js, _ := json.Marshal(keys)
+	err = ioutil.WriteFile(keyfile, js, 0600)
 	return err
 }
