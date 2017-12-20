@@ -6,6 +6,7 @@ import (
 	"crypto/rsa"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/golang/protobuf/proto"
 	"github.com/urfave/cli"
@@ -17,7 +18,7 @@ import (
 
 func main() {
 	app := cli.NewApp()
-	app.Name = "RPC Test"
+	app.Name = "gochain"
 	app.Usage = ""
 
 	app.Commands = []cli.Command{
@@ -79,9 +80,20 @@ func serve(c *cli.Context) error {
 	s := &gorpc.Server{
 		Addr: ":" + fmt.Sprintf("%d", c.Int("port")),
 		Handler: func(clientAddr string, request interface{}) interface{} {
-			cool_data := Test{}
-			proto.Unmarshal(request.([]byte), &cool_data) // returns an err, but meh
-			log.Printf("Obtained request %v from the client %s\n", cool_data.Msg, clientAddr)
+			action := Action{}
+			proto.Unmarshal(request.([]byte), &action) // returns an err, but meh
+			switch action.Type {
+			case Action_SEND:
+				log.Printf("Obtained request %v from the client %s\n", action, clientAddr)
+			case Action_VIEW:
+				log.Printf("Obtained request %v from the client %s\n", action, clientAddr)
+			case Action_LIST:
+				log.Printf("Obtained request %v from the client %s\n", action, clientAddr)
+			case Action_BALANCE:
+				log.Printf("Obtained request %v from the client %s\n", action, clientAddr)
+			default:
+				return errors.New("Invalid action")
+			}
 			return request
 		},
 	}
